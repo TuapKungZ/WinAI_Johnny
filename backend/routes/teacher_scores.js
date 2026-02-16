@@ -44,7 +44,7 @@ router.get("/headers", async (req, res) => {
              FROM score_items
              WHERE section_id = $1
              ORDER BY id ASC`,
-             [section_id]
+            [section_id]
         );
 
         res.json(result.rows);
@@ -95,6 +95,30 @@ router.delete("/header_delete/:id", async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         console.error("ERROR /header_delete:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+/* ----------------------------------------------------
+   4.5) แก้ไขหัวข้อคะแนน (ชื่อ + คะแนนเต็ม)
+---------------------------------------------------- */
+router.put("/header_update/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, max_score } = req.body;
+
+        const result = await pool.query(
+            `UPDATE score_items SET title = $1, max_score = $2 WHERE id = $3 RETURNING id, title, max_score`,
+            [title, max_score, id]
+        );
+
+        if (!result.rows.length) {
+            return res.status(404).json({ error: "Header not found" });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error("ERROR /header_update:", err);
         res.status(500).json({ error: "Server error" });
     }
 });

@@ -47,17 +47,17 @@ router.get("/advisor", async (req, res) => {
         if (!student_id) return res.status(400).json({ error: "student_id required" });
 
         const studentRes = await pool.query(
-            `SELECT class_level FROM students WHERE id=$1`,
+            `SELECT class_level, room FROM students WHERE id=$1`,
             [student_id]
         );
         if (!studentRes.rows.length) return res.status(404).json({ error: "student not found" });
 
-        const classLevel = studentRes.rows[0].class_level;
-        const params = [classLevel];
+        const { class_level: classLevel, room: studentRoom } = studentRes.rows[0];
+        const params = [classLevel, studentRoom || ""];
         let filter = "";
         if (year && semester) {
             params.push(year, semester);
-            filter = " AND year = $2 AND semester = $3";
+            filter = " AND ta.year = $3 AND ta.semester = $4";
         }
 
         const advisorRes = await pool.query(
@@ -65,17 +65,16 @@ router.get("/advisor", async (req, res) => {
                     t.teacher_code, t.first_name, t.last_name
              FROM teacher_advisors ta
              JOIN teachers t ON ta.teacher_id = t.id
-             WHERE ta.class_level = $1${filter}
-             ORDER BY ta.year DESC, ta.semester DESC
-             LIMIT 1`,
+             WHERE ta.class_level = $1 AND ta.room = $2${filter}
+             ORDER BY t.teacher_code ASC`,
             params
         );
 
         if (!advisorRes.rows.length) {
-            return res.json({ advisor: null });
+            return res.json({ advisors: [] });
         }
 
-        res.json({ advisor: advisorRes.rows[0] });
+        res.json({ advisors: advisorRes.rows });
     } catch (err) {
         console.error("ERROR /student/advisor:", err);
         res.status(500).json({ error: "Server error" });

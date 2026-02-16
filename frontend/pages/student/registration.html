@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,20 @@
 
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .schedule-badge {
+            display: inline-block;
+            background: #e8f4f0;
+            color: #2a7d5f;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.82em;
+            font-weight: 500;
+            border: 1px solid #c3e6d8;
+        }
+    </style>
 </head>
+
 <body>
 
     <aside class="sidebar">
@@ -19,14 +33,18 @@
             </div>
         </div>
 
-                        <ul class="menu-list">
-            <li><a href="registration.html" class="menu-item active"><i class="fa-solid fa-file-signature"></i> ลงทะเบียนเรียน</a></li>
+        <ul class="menu-list">
+            <li><a href="registration.html" class="menu-item active"><i class="fa-solid fa-file-signature"></i>
+                    ลงทะเบียนเรียน</a></li>
             <li><a href="schedule.html" class="menu-item"><i class="fa-solid fa-table"></i> ตารางเรียน</a></li>
             <li><a href="profile.html" class="menu-item"><i class="fa-solid fa-id-card"></i> ข้อมูลส่วนตัว</a></li>
             <li><a href="grades.html" class="menu-item"><i class="fa-solid fa-user-graduate"></i> ผลการศึกษา</a></li>
-            <li><a href="health.html" class="menu-item"><i class="fa-solid fa-hand-holding-heart"></i> ผลประเมินสุขภาพ</a></li>
-            <li><a href="evaluation.html" class="menu-item"><i class="fa-solid fa-chalkboard-user"></i> ประเมินการเรียนการสอน</a></li>
-            <li><a href="learning_results.html" class="menu-item"><i class="fa-solid fa-chart-bar"></i> ผลประเมินการเรียน</a></li>
+            <li><a href="health.html" class="menu-item"><i class="fa-solid fa-hand-holding-heart"></i>
+                    ผลประเมินสุขภาพ</a></li>
+            <li><a href="evaluation.html" class="menu-item"><i class="fa-solid fa-chalkboard-user"></i>
+                    ประเมินการเรียนการสอน</a></li>
+            <li><a href="learning_results.html" class="menu-item"><i class="fa-solid fa-chart-bar"></i>
+                    ผลประเมินการเรียน</a></li>
             <li><a href="conduct.html" class="menu-item"><i class="fa-solid fa-star"></i> ผลคะแนนความประพฤติ</a></li>
             <li><a href="activities.html" class="menu-item"><i class="fa-solid fa-bullhorn"></i> ปฏิทินกิจกรรม</a></li>
         </ul>
@@ -43,7 +61,7 @@
                 <h1 class="student-title">ลงทะเบียนรายวิชา</h1>
                 <p class="student-subtitle">ค้นหาและจัดการตะกร้ารายวิชาในที่เดียว</p>
             </div>
-                        <div class="student-hero-cards">
+            <div class="student-hero-cards">
                 <div class="student-hero-card">
                     <div class="student-hero-label">ครูที่ปรึกษา</div>
                     <div class="student-hero-value" id="regHeroAdvisor">-</div>
@@ -53,7 +71,7 @@
                     <div class="student-hero-value" id="regHeroCount">0</div>
                 </div>
             </div>
-</div>
+            </div>
         </section>
 
         <section class="student-section">
@@ -84,16 +102,20 @@
                 <h3><i class="fas fa-search"></i> ค้นหารายวิชาที่เปิดสอน</h3>
                 <span class="student-pill">ค้นด้วยรหัสหรือชื่อวิชา</span>
             </div>
-            <div class="student-actions">
-                <input type="text" id="subjectSearch" class="custom-select" placeholder="ค้นหารหัส หรือชื่อวิชา เช่น TH101, คณิตศาสตร์...">
+            <div class="student-actions" style="gap: 8px;">
+                <input type="text" id="subjectSearch" class="custom-select"
+                    placeholder="ค้นหารหัส หรือชื่อวิชา เช่น TH101, คณิตศาสตร์...">
                 <button class="btn-primary" id="btnSearch">
                     <i class="fas fa-search"></i> ค้นหา
+                </button>
+                <button class="btn-primary" id="btnBrowse" style="background:#2a7d5f;">
+                    <i class="fas fa-list"></i> ดูวิชาทั้งหมด
                 </button>
             </div>
             <div id="searchResult" style="margin-top: 16px;"></div>
         </section>
 
-        <section class="student-section">
+        <section class="student-section" id="cartSection">
             <div class="student-section-head">
                 <h3><i class="fas fa-shopping-basket"></i> รายวิชาที่เลือกไว้</h3>
                 <span class="student-pill">จัดการตะกร้ารายวิชา</span>
@@ -136,16 +158,33 @@
                             <th>ชื่อรายวิชา</th>
                             <th class="center">หน่วยกิต</th>
                             <th>วัน/เวลา</th>
+                            <th class="center">จัดการ</th>
                         </tr>
                     </thead>
                     <tbody id="registeredItems">
                         <tr>
-                            <td colspan="4" class="center">กำลังโหลด...</td>
+                            <td colspan="5" class="center">กำลังโหลด...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </section>
+
+        <!-- Browse Modal -->
+        <div id="browseModal" class="modal">
+            <div class="modal-background" data-modal-close="browseModal"></div>
+            <div class="modal-content" style="max-width: 800px; width: 90%;">
+                <div class="modal-header">
+                    <h3>รายวิชาที่เปิดสอนทั้งหมด</h3>
+                    <button class="modal-close" data-modal-close="browseModal"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body" style="max-height: 60vh; overflow-y: auto; padding: 16px;">
+                    <div id="browseModalList">
+                        <!-- Subjects will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script type="module" src="../../js/registration.js"></script>
@@ -157,4 +196,5 @@
     </script>
 
 </body>
+
 </html>

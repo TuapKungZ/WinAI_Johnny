@@ -251,7 +251,22 @@ function renderScoreTable() {
                 <tr>
                     <th>รหัสนักเรียน</th>
                     <th>ชื่อ-นามสกุล</th>
-                    ${currentHeaders.map((h) => `<th>${h.title}<div class="score-max">เต็ม ${h.max_score}</div></th>`).join("")}
+                    ${currentHeaders.map((h) => `
+                        <th style="position:relative;">
+                            <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
+                                <span>${h.title}</span>
+                                <button onclick="editHeader(${h.id})" title="แก้ไขหัวข้อ"
+                                    style="background:none; border:none; color:#000; cursor:pointer; font-size:0.8em; padding:2px;">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </button>
+                                <button onclick="deleteHeader(${h.id})" title="ลบหัวข้อ"
+                                    style="background:none; border:none; color:#000; cursor:pointer; font-size:0.8em; padding:2px;">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <div class="score-max">เต็ม ${h.max_score}</div>
+                        </th>
+                    `).join("")}
                     <th>คะแนนรวม</th>
                 </tr>
             </thead>
@@ -307,6 +322,43 @@ function renderScoreTable() {
         });
     });
 }
+
+// แก้ไขหัวข้อคะแนน
+window.editHeader = async function (id) {
+    const header = currentHeaders.find((h) => h.id === id);
+    if (!header) return;
+
+    const newTitle = prompt("ชื่อหัวข้อคะแนน:", header.title);
+    if (newTitle === null) return; // cancelled
+    if (!newTitle.trim()) {
+        alert("กรุณากรอกชื่อหัวข้อคะแนน");
+        return;
+    }
+
+    const newMax = prompt("คะแนนเต็ม:", header.max_score);
+    if (newMax === null) return; // cancelled
+    if (!newMax || Number(newMax) <= 0 || isNaN(Number(newMax))) {
+        alert("คะแนนเต็มต้องเป็นตัวเลขและมากกว่า 0");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}/teacher/scores/header_update/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: newTitle.trim(), max_score: Number(newMax) })
+        });
+        const data = await res.json();
+        if (data.id) {
+            // Reload the table with updated headers
+            await loadHeaders();
+        } else {
+            alert("แก้ไขไม่สำเร็จ");
+        }
+    } catch (err) {
+        alert("เกิดข้อผิดพลาดในการแก้ไขหัวข้อ");
+    }
+};
 
 async function saveAllScores() {
     if (!currentHeaders.length) {

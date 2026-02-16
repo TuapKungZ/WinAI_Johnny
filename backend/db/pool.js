@@ -2,14 +2,11 @@ import pg from "pg";
 const { Pool } = pg;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+  user: "postgres",
+  host: "26.47.10.181",
+  database: "johny_db",      // <-- ชื่อ DB ของคุณ
+  password: "1234",      // <-- รหัส PostgreSQL ของคุณ
+  port: 5432,
 });
 
-export default pool;
-
-
-/*const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
-});*/
+export default pool;  

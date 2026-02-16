@@ -11,7 +11,9 @@ import {
     loadRegistered,
     confirmRegistration,
     removeCartItem,
-    loadAdvisor
+    loadAdvisor,
+    browseOpenSections,
+    openModal
 } from "./app.js";
 
 let student;
@@ -26,16 +28,24 @@ window.onload = async () => {
 
 function bindEvents() {
     qs("#btnSearch").addEventListener("click", searchHandler);
+    qs("#btnBrowse").addEventListener("click", browseSubjects);
+
+    // Search on Enter key
+    qs("#subjectSearch").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") searchHandler();
+    });
 
     qs("#regYear").addEventListener("change", () => {
         updateHero();
         updateAdvisor();
         loadCartTable();
+        browseSubjects();
     });
     qs("#regSemester").addEventListener("change", () => {
         updateHero();
         updateAdvisor();
         loadCartTable();
+        browseSubjects();
     });
 
     const confirmBtn = qs("#confirmRegistrationBtn");
@@ -49,13 +59,20 @@ async function updateAdvisor() {
     const year = qs("#regYear").value;
     const semester = qs("#regSemester").value;
     const data = await loadAdvisor(student.id, year, semester);
-    const advisor = data?.advisor;
-    if (!advisor) {
+
+    // Support both old {advisor: {...}} and new {advisors: [...]} formats
+    const advisors = data.advisors || (data.advisor ? [data.advisor] : []);
+
+    if (!advisors.length) {
         target.textContent = "-";
         return;
     }
-    const name = `${advisor.teacher_code || ""} ${advisor.first_name || ""} ${advisor.last_name || ""}`.trim();
-    target.textContent = name || "-";
+
+    const names = advisors.map(adv =>
+        `${adv.teacher_code || ""} ${adv.first_name || ""} ${adv.last_name || ""}`.trim()
+    ).join("<br>");
+
+    target.innerHTML = names || "-";
 }
 
 function updateHero(count = null) {
@@ -70,6 +87,41 @@ function updateHero(count = null) {
     if (heroCount && count !== null) heroCount.textContent = count;
 }
 
+// ดูรายวิชาทั้งหมดที่เปิดสอนในเทอมนี้
+async function browseSubjects() {
+    const year = qs("#regYear").value;
+    const semester = qs("#regSemester").value;
+    const modalList = qs("#browseModalList");
+
+    // Clear search input when browsing
+    qs("#subjectSearch").value = "";
+
+    // Open modal immediately with loading state
+    openModal("browseModal");
+    modalList.innerHTML = `<div class="center" style="padding:20px;">กำลังโหลดรายวิชาที่เปิดสอน...</div>`;
+
+    try {
+        const subjects = await browseOpenSections(year, semester, student.class_level, student.room);
+
+        if (!subjects || subjects.length === 0) {
+            modalList.innerHTML = `
+                <div style="background:#fff9e6; border:1px dashed #f0ad4e; padding:15px; border-radius:8px; text-align:center; color:#8a6d3b;">
+                    <i class="fas fa-info-circle"></i>
+                    ไม่พบรายวิชาที่เปิดสอนในปี/เทอม/ระดับชั้นของคุณ
+                </div>`;
+            return;
+        }
+
+        renderSubjectList(subjects, modalList);
+    } catch (err) {
+        modalList.innerHTML = `
+            <div style="background:#fff0f0; border:1px dashed #e74c3c; padding:15px; border-radius:8px; text-align:center;">
+                <i class="fas fa-exclamation-circle" style="color:#e74c3c;"></i>
+                เกิดข้อผิดพลาดในการโหลดรายวิชา
+            </div>`;
+    }
+}
+
 // ค้นหารายวิชา
 async function searchHandler() {
     const keyword = qs("#subjectSearch").value.trim();
@@ -77,58 +129,102 @@ async function searchHandler() {
     clearFieldErrors(document.body);
 
     if (!keyword) {
-        setFieldError(qs("#subjectSearch"), "กรุณากรอกคำค้นหา");
+        // If empty, browse all (in modal)
+        await browseSubjects();
         return;
     }
 
     setState(searchResult, "loading", "กำลังค้นหารายวิชา...");
-    const found = await searchSubject(keyword);
 
-    if (found.length === 0) {
+    // Search from browse results (filtered by student's class)
+    const year = qs("#regYear").value;
+    const semester = qs("#regSemester").value;
+
+    try {
+        const allSubjects = await browseOpenSections(year, semester, student.class_level, student.room);
+        const lowerKeyword = keyword.toLowerCase();
+
+        const found = allSubjects.filter(s =>
+            s.subject_code.toLowerCase().includes(lowerKeyword) ||
+            s.subject_name.toLowerCase().includes(lowerKeyword)
+        );
+
+        if (found.length === 0) {
+            searchResult.innerHTML = `
+                <div style="background:#fff0f0; border:1px dashed #e74c3c; padding:15px; border-radius:8px; text-align:center;">
+                    <i class="fas fa-exclamation-circle" style="color:#e74c3c;"></i>
+                    ไม่พบรายวิชาที่ตรงกับ "<strong>${keyword}</strong>"
+                </div>`;
+            return;
+        }
+
+        renderSubjectList(found, searchResult);
+    } catch (err) {
         searchResult.innerHTML = `
             <div style="background:#fff0f0; border:1px dashed #e74c3c; padding:15px; border-radius:8px; text-align:center;">
                 <i class="fas fa-exclamation-circle" style="color:#e74c3c;"></i>
-                ไม่พบรายวิชา
+                เกิดข้อผิดพลาดในการค้นหา
             </div>`;
-        return;
     }
+}
 
-    const subj = found[0];
-    searchResult.innerHTML = `
-        <div class="student-activity-card" 
-             style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <h4>${subj.subject_code} - ${subj.name}</h4>
-                <p style="color:#666;">
-                    <b>หน่วยกิต:</b> ${subj.credit}
-                </p>
+// แสดงรายการวิชา
+function renderSubjectList(subjects, container) {
+    if (!container) return;
+
+    const cards = subjects.map(subj => {
+        const scheduleInfo = subj.schedules && subj.schedules.length > 0
+            ? subj.schedules.map(sch => {
+                const day = sch.day_of_week || "-";
+                const time = sch.time_range || "-";
+                return `<span class="schedule-badge">${day} ${time}</span>`;
+            }).join(" ")
+            : '<span style="color:#999;">ยังไม่กำหนดเวลา</span>';
+
+        const teacherInfo = subj.teacher_name ? `<span style="color:#555;"><i class="fas fa-user-tie"></i> ${subj.teacher_name}</span>` : "";
+
+        return `
+            <div class="student-activity-card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap: wrap; gap: 10px;">
+                <div style="flex:1; min-width: 200px;">
+                    <h4 style="margin:0 0 4px 0;">${subj.subject_code} — ${subj.subject_name}</h4>
+                    <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:0.9em;">
+                        <span><strong>หน่วยกิต:</strong> ${subj.credit}</span>
+                        ${teacherInfo}
+                    </div>
+                    <div style="margin-top:4px; display:flex; flex-wrap:wrap; gap:4px;">
+                        ${scheduleInfo}
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="selectSubject(${subj.subject_id}, ${subj.section_id})" style="white-space:nowrap; margin-left:auto;">
+                    <i class="fa-solid fa-cart-plus"></i> เลือก
+                </button>
             </div>
-            <button class="btn-primary" onclick="selectSubject(${subj.id})">
-                <i class="fa-solid fa-cart-plus"></i>
-                เลือก
-            </button>
+        `;
+    }).join("");
+
+    container.innerHTML = `
+        <div style="margin-bottom:8px; color:#666; font-size:0.9em;">
+            <i class="fas fa-list"></i> พบ ${subjects.length} รายวิชา
         </div>
+        ${cards}
     `;
 }
 
 // เลือกวิชาแล้วเข้าตะกร้า
-window.selectSubject = async (subject_id) => {
+window.selectSubject = async (subject_id, section_id) => {
     const year = qs("#regYear").value;
     const semester = qs("#regSemester").value;
 
-    const sections = await loadOpenSections(year, semester);
-    const section = sections.find(s => s.subject_id == subject_id);
+    try {
+        await addToCart(student.id, section_id, year, semester);
+        await loadCartTable();
 
-    if (!section) {
-        alert("วิชานี้ไม่เปิดสอนในปี/เทอมที่เลือก");
-        return;
+        // Scroll to cart
+        const cartSection = document.getElementById("cartSection");
+        if (cartSection) cartSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (err) {
+        alert("เกิดข้อผิดพลาดในการเพิ่มวิชา");
     }
-
-    await addToCart(student.id, section.id, year, semester);
-    await loadCartTable();
-
-    const cartSection = document.querySelectorAll(".student-section")[2];
-    if (cartSection) cartSection.scrollIntoView({ behavior: "smooth", block: "start" });
 };
 
 // โหลดตะกร้า
@@ -143,24 +239,51 @@ async function loadCartTable() {
         </tr>`;
 
     const items = await loadCart(student.id, year, semester);
-    updateHero(items.length);
 
-    if (items.length === 0) {
+    // Group items by subject_code
+    const grouped = {};
+    items.forEach(item => {
+        const key = item.subject_code;
+        if (!grouped[key]) {
+            grouped[key] = {
+                ...item,
+                ids: [item.id],
+                times: []
+            };
+        } else {
+            grouped[key].ids.push(item.id);
+        }
+        // Only add time entry if day or time exist
+        const day = item.day_of_week || "";
+        const time = item.time_range || "";
+        if (day || time) {
+            grouped[key].times.push(`${day} ${time}`.trim());
+        }
+    });
+
+    const groupedItems = Object.values(grouped);
+    updateHero(groupedItems.length);
+
+    if (groupedItems.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="5" class="center">ยังไม่มีรายวิชาในตะกร้า</td>
             </tr>`;
     } else {
         tbody.innerHTML = "";
-        items.forEach(item => {
+        groupedItems.forEach(item => {
             const tr = document.createElement("tr");
+            const timeDisplay = item.times.length > 0 ? item.times.join("<br>") : "-";
+            // Store all IDs in data attribute for deletion
+            const idsStr = JSON.stringify(item.ids);
+
             tr.innerHTML = `
                 <td>${item.subject_code}</td>
                 <td style="text-align:left;">${item.subject_name}</td>
                 <td class="center">${item.credit}</td>
-                <td>${item.day_of_week ?? "-"} ${item.time_range ?? ""}</td>
+                <td>${timeDisplay}</td>
                 <td class="center">
-                    <button class="btn-icon delete" onclick="removeItem(${item.id})">
+                    <button class="btn-icon delete" onclick='removeItem(${idsStr})'>
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </td>
@@ -181,36 +304,70 @@ async function loadRegisteredTable() {
 
     tbody.innerHTML = `
         <tr>
-            <td colspan="4" class="center">กำลังโหลด...</td>
+            <td colspan="5" class="center">กำลังโหลด...</td>
         </tr>`;
 
     const items = await loadRegistered(student.id, year, semester);
     if (!items.length) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="4" class="center">ยังไม่มีรายวิชาที่บันทึกแล้ว</td>
+                <td colspan="5" class="center">ยังไม่มีรายวิชาที่บันทึกแล้ว</td>
             </tr>`;
         return;
     }
 
-    tbody.innerHTML = "";
+    // Group items by subject_code
+    const grouped = {};
     items.forEach(item => {
+        const key = item.subject_code;
+        if (!grouped[key]) {
+            grouped[key] = {
+                ...item,
+                ids: [item.id],
+                times: []
+            };
+        } else {
+            grouped[key].ids.push(item.id);
+        }
+        const day = item.day_of_week || "";
+        const time = item.time_range || "";
+        if (day || time) {
+            grouped[key].times.push(`${day} ${time}`.trim());
+        }
+    });
+
+    tbody.innerHTML = "";
+    Object.values(grouped).forEach(item => {
         const tr = document.createElement("tr");
+        const timeDisplay = item.times.length > 0 ? item.times.join("<br>") : "-";
+        const idsStr = JSON.stringify(item.ids);
+
         tr.innerHTML = `
             <td>${item.subject_code}</td>
             <td style="text-align:left;">${item.subject_name}</td>
             <td class="center">${item.credit}</td>
-            <td>${item.day_of_week ?? "-"} ${item.time_range ?? ""}</td>
+            <td>${timeDisplay}</td>
+            <td class="center">
+                <button class="btn-icon delete" onclick='removeRegisteredItem(${idsStr})'>
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
 }
 
-// ลบออกจากตะกร้า
-window.removeItem = async (id) => {
+// ลบออกจากตะกร้า (รองรับการลบหลาย ID พร้อมกัน)
+window.removeItem = async (ids) => {
+    // If passed a single number (backward compatibility), wrap in array
+    const idList = Array.isArray(ids) ? ids : [ids];
+
     const ok = confirm("ต้องการลบวิชานี้ออกจากตะกร้าหรือไม่?");
     if (!ok) return;
-    await removeCartItem(id);
+
+    for (const id of idList) {
+        await removeCartItem(id);
+    }
     await loadCartTable();
 };
 
@@ -223,3 +380,15 @@ async function confirmCart() {
     await confirmRegistration(student.id, year, semester);
     await loadCartTable();
 }
+
+// ลบออกจากวิชาที่บันทึกแล้ว (สำหรับทดสอบ)
+window.removeRegisteredItem = async (ids) => {
+    const idList = Array.isArray(ids) ? ids : [ids];
+    const ok = confirm("ต้องการลบวิชานี้ออกจากรายการที่บันทึกแล้วหรือไม่? (ใช้สำหรับทดสอบระบบ)");
+    if (!ok) return;
+
+    for (const id of idList) {
+        await removeCartItem(id);
+    }
+    await loadCartTable();
+};

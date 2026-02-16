@@ -60,7 +60,7 @@ function showTab(type) {
 // โหลดข้อมูลตารางเรียน + ตารางสอบ
 // ----------------------------
 async function refreshSchedule() {
-    
+
     const year = qs("#yearSelect").value;
     const semester = qs("#termSelect").value;
 
@@ -328,13 +328,20 @@ async function loadAdvisorInfo(year, semester) {
     const target = qs("#scheduleAdvisor");
     if (!target) return;
     const data = await loadAdvisor(student.id, year, semester);
-    const advisor = data?.advisor;
-    if (!advisor) {
+
+    // Support both old {advisor: {...}} and new {advisors: [...]} formats
+    const advisors = data.advisors || (data.advisor ? [data.advisor] : []);
+
+    if (!advisors.length) {
         target.textContent = "-";
         return;
     }
-    const name = `${advisor.teacher_code || ""} ${advisor.first_name || ""} ${advisor.last_name || ""}`.trim();
-    target.textContent = name || "-";
+
+    const names = advisors.map(adv =>
+        `${adv.teacher_code || ""} ${adv.first_name || ""} ${adv.last_name || ""}`.trim()
+    ).join("<br>");
+
+    target.innerHTML = names || "-";
 }
 
 function dayFromDate(dateStr) {
