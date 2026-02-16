@@ -131,7 +131,7 @@ router.get("/students", async (req, res) => {
         const { section_id } = req.query;
 
         const result = await pool.query(
-            `SELECT st.id AS student_id,
+            `SELECT DISTINCT st.id AS student_id,
                     st.student_code,
                     st.first_name,
                     st.last_name

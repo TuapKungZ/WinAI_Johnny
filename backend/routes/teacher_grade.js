@@ -169,7 +169,7 @@ router.get("/scores", async (req, res) => {
                     (x) => x.item_id === h.id && x.student_id === stu.student_id
                 );
 
-                const point = sc ? sc.score : 0;
+                const point = sc ? Number(sc.score) : 0;
                 total += point;
 
                 detail.push({

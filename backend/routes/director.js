@@ -704,13 +704,35 @@ router.put("/sections/:id", async (req, res) => {
 });
 
 router.delete("/sections/:id", async (req, res) => {
+    const client = await pool.connect();
     try {
         const { id } = req.params;
-        await pool.query("DELETE FROM subject_sections WHERE id=$1", [id]);
+        await client.query("BEGIN");
+
+        // Delete scores that belong to score_items of this section
+        await client.query(
+            `DELETE FROM scores WHERE item_id IN (SELECT id FROM score_items WHERE section_id = $1)`,
+            [id]
+        );
+        // Delete score headers
+        await client.query("DELETE FROM score_items WHERE section_id = $1", [id]);
+        // Delete grades
+        await client.query("DELETE FROM grades WHERE section_id = $1", [id]);
+        // Delete grade thresholds
+        await client.query("DELETE FROM grade_thresholds WHERE section_id = $1", [id]);
+        // Delete registrations
+        await client.query("DELETE FROM registrations WHERE section_id = $1", [id]);
+        // Finally delete the section itself
+        await client.query("DELETE FROM subject_sections WHERE id = $1", [id]);
+
+        await client.query("COMMIT");
         res.json({ success: true });
     } catch (err) {
+        await client.query("ROLLBACK");
         console.error("ERROR /director/sections DELETE:", err);
         res.status(500).json({ error: "Server error" });
+    } finally {
+        client.release();
     }
 });
 
