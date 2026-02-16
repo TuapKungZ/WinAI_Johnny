@@ -14,7 +14,7 @@ window.onload = async () => {
     await loadSubjects();
 
     qs("#subjectSelect").addEventListener("change", loadSectionInfo);
-    qs("#levelSelect").addEventListener("change", updateSectionSelection);
+    qs("#levelSelect").addEventListener("change", () => updateRoomOptions());
     qs("#roomSelect").addEventListener("change", updateSectionSelection);
     qs("#studentSearchInput").addEventListener("input", filterTable);
     qs("#gradeA").addEventListener("input", handleThresholdChange);
@@ -45,59 +45,81 @@ async function loadSubjects() {
         return;
     }
 
+    // Group by unique subject_code + subject_name
+    const seen = new Set();
     sectionList.forEach((sec) => {
-        box.innerHTML += `
-            <option value="${sec.section_id}">
-                ${sec.subject_code} - ${sec.subject_name}
-            </option>
-        `;
+        const key = `${sec.subject_code}|${sec.subject_name}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            box.innerHTML += `
+                <option value="${key}">
+                    ${sec.subject_code} - ${sec.subject_name}
+                </option>
+            `;
+        }
     });
 
-    populateLevelRoomOptions();
     loadSectionInfo();
 }
 
-function populateLevelRoomOptions() {
-    const levels = ["ม.1", "ม.2", "ม.3", "ม.4", "ม.5", "ม.6"];
-    const rooms = ["1", "2", "3", "4", "5", "6"];
+function loadSectionInfo() {
+    const subjectKey = qs("#subjectSelect").value;
+    if (!subjectKey) return;
 
+    const [code, name] = subjectKey.split("|");
+    const matching = sectionList.filter(
+        (s) => s.subject_code === code && s.subject_name === name
+    );
+
+    // Populate level dropdown with unique levels for this subject
     const levelSelect = qs("#levelSelect");
-    const roomSelect = qs("#roomSelect");
-
+    const uniqueLevels = [...new Set(matching.map((s) => s.class_level))];
     levelSelect.innerHTML = "";
-    roomSelect.innerHTML = "";
-
-    levels.forEach((level) => {
-        levelSelect.innerHTML += `<option value="${level}">${level}</option>`;
+    uniqueLevels.forEach((lv) => {
+        levelSelect.innerHTML += `<option value="${lv}">${lv}</option>`;
     });
 
-    rooms.forEach((room) => {
-        roomSelect.innerHTML += `<option value="${room}">${room}</option>`;
-    });
+    // Populate room dropdown based on selected level
+    updateRoomOptions(matching);
 }
 
-function loadSectionInfo() {
-    const secId = qs("#subjectSelect").value;
-    const sec = sectionList.find((s) => String(s.section_id) === String(secId));
-    if (!sec) return;
+function updateRoomOptions(matching) {
+    if (!matching) {
+        const subjectKey = qs("#subjectSelect").value;
+        if (!subjectKey) return;
+        const [code, name] = subjectKey.split("|");
+        matching = sectionList.filter(
+            (s) => s.subject_code === code && s.subject_name === name
+        );
+    }
 
-    qs("#levelSelect").value = sec.class_level;
-    qs("#roomSelect").value = sec.room;
-    selectedSection = sec.section_id;
+    const level = qs("#levelSelect").value;
+    const roomSelect = qs("#roomSelect");
+    const filteredByLevel = matching.filter((s) => s.class_level === level);
+
+    const uniqueRooms = [...new Set(filteredByLevel.map((s) => s.room))];
+    roomSelect.innerHTML = "";
+    uniqueRooms.forEach((rm) => {
+        roomSelect.innerHTML += `<option value="${rm}">${rm}</option>`;
+    });
+
+    updateSectionSelection();
 }
 
 function updateSectionSelection() {
+    const subjectKey = qs("#subjectSelect").value;
+    if (!subjectKey) return;
+
+    const [code, name] = subjectKey.split("|");
     const level = qs("#levelSelect").value;
     const room = qs("#roomSelect").value;
 
     const sec = sectionList.find(
-        (s) => String(s.class_level) === String(level) && String(s.room) === String(room)
+        (s) => s.subject_code === code && s.subject_name === name &&
+            String(s.class_level) === String(level) && String(s.room) === String(room)
     );
 
-    if (sec) {
-        selectedSection = sec.section_id;
-        qs("#subjectSelect").value = sec.section_id;
-    }
+    selectedSection = sec ? sec.section_id : null;
 }
 
 async function loadScoreTable() {
@@ -134,7 +156,7 @@ function renderScoreTable(list) {
     `;
 
     list.forEach((stu) => {
-        const totalScore = stu.saved_total_score ?? stu.total_score ?? 0;
+        const totalScore = stu.total_score ?? 0;
         const grade = stu.saved_grade || calculateGrade(Number(totalScore));
 
         html += `
@@ -268,7 +290,14 @@ async function saveGrades(silent = false) {
         setFieldError(qs("#subjectSelect"), "กรุณาเลือกวิชา");
         return;
     }
-    await saveThresholds();
+
+    // Try saving thresholds first, but don't block saving grades if it fails
+    try {
+        await saveThresholds();
+    } catch (err) {
+        console.warn("Failed to save thresholds:", err);
+    }
+
     const sumInputs = document.querySelectorAll(".sum-input");
     const gradeInputs = document.querySelectorAll(".grade-input");
 

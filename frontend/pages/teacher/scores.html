@@ -25,11 +25,14 @@
             <li><a href="attendance.html" class="menu-item"><i class="fa-solid fa-calendar-check"></i> เช็คชื่อ</a></li>
             <li><a href="scores.html" class="menu-item active"><i class="fa-solid fa-pen-nib"></i> กรอกคะแนน</a></li>
             <li><a href="grade_cut.html" class="menu-item"><i class="fa-solid fa-scissors"></i> ตัดเกรด</a></li>
-            <li><a href="teaching_evaluation.html" class="menu-item"><i class="fa-solid fa-chart-line"></i> ผลประเมินการสอน</a></li>
-            <li><a href="advisor_evaluation.html" class="menu-item"><i class="fa-solid fa-user-check"></i> ประเมินนักเรียน</a></li>
+            <li><a href="teaching_evaluation.html" class="menu-item"><i class="fa-solid fa-chart-line"></i>
+                    ผลประเมินการสอน</a></li>
+            <li><a href="advisor_evaluation.html" class="menu-item"><i class="fa-solid fa-user-check"></i>
+                    ประเมินนักเรียน</a></li>
             <li><a href="fitness.html" class="menu-item"><i class="fa-solid fa-dumbbell"></i> ทดสอบสมรรถนะ</a></li>
             <li><a href="calendar.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i> ปฏิทิน</a></li>
-            <li><a href="exam_calendar.html" class="menu-item"><i class="fa-solid fa-clipboard-list"></i> ตารางสอบ</a></li>
+            <li><a href="exam_calendar.html" class="menu-item"><i class="fa-solid fa-clipboard-list"></i> ตารางสอบ</a>
+            </li>
         </ul>
 
         <div class="logout-btn" onclick="logoutTeacher()">
@@ -52,24 +55,12 @@
 
             <div class="score-field">
                 <label>ระดับชั้น</label>
-                <select id="levelSelect">
-                    <option value="ม.1">ม.1</option>
-                    <option value="ม.2">ม.2</option>
-                    <option value="ม.3">ม.3</option>
-                    <option value="ม.4">ม.4</option>
-                    <option value="ม.5">ม.5</option>
-                    <option value="ม.6">ม.6</option>
-                </select>
+                <select id="levelSelect"></select>
             </div>
 
             <div class="score-field">
                 <label>ห้อง</label>
-                <select id="roomSelect">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                </select>
+                <select id="roomSelect"></select>
             </div>
 
             <div class="score-field score-action">
@@ -97,10 +88,11 @@
         <div class="modal-backdrop" data-modal-close="headerModal"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3>เพิ่มหัวข้อคะแนน</h3>
+                <h3 id="headerModalTitle">เพิ่มหัวข้อคะแนน</h3>
                 <button class="modal-close" data-modal-close="headerModal">×</button>
             </div>
             <div class="score-form-grid header-form-grid">
+                <input type="hidden" id="editHeaderId">
                 <div class="header-form-field">
                     <label>ชื่อหัวข้อคะแนน</label>
                     <input type="text" id="headerName" placeholder="เช่น เก็บคะแนน, งานที่ 1">
@@ -110,8 +102,8 @@
                     <input type="number" id="maxScore" placeholder="เช่น 10">
                 </div>
                 <div class="header-form-action">
-                    <span class="sr-only">เพิ่มหัวข้อคะแนน</span>
-                    <button class="btn-primary" id="addHeaderBtn">เพิ่มหัวข้อคะแนน</button>
+                    <span class="sr-only">บันทึก</span>
+                    <button class="btn-primary" id="saveHeaderFormBtn">บันทึก</button>
                 </div>
             </div>
         </div>

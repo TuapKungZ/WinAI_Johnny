@@ -29,14 +29,16 @@ window.onload = async () => {
     await loadSubjects();
 
     qs("#subjectSelect").addEventListener("change", loadSectionInfo);
-    qs("#levelSelect").addEventListener("change", updateSectionSelection);
+    qs("#levelSelect").addEventListener("change", () => updateRoomOptions());
     qs("#roomSelect").addEventListener("change", updateSectionSelection);
     qs("#loadHeadersBtn").addEventListener("click", loadHeaders);
     qs("#saveAllScoresBtn").addEventListener("click", saveAllScores);
-    qs("#addHeaderBtn").addEventListener("click", addHeader);
+    qs("#saveHeaderFormBtn").addEventListener("click", saveHeaderForm);
     qs("#openHeaderModalBtn").addEventListener("click", () => {
+        qs("#editHeaderId").value = "";
         qs("#headerName").value = "";
         qs("#maxScore").value = "";
+        qs("#headerModalTitle").textContent = "เพิ่มหัวข้อคะแนน";
         openModal("headerModal");
     });
 
@@ -63,37 +65,86 @@ async function loadSubjects() {
     sectionList = subjects;
     box.innerHTML = "";
 
+    // Group by unique subject_code + subject_name
+    const seen = new Set();
     subjects.forEach((sec) => {
-        box.innerHTML += `
-            <option value="${sec.section_id}">
-                ${sec.subject_code} - ${sec.subject_name}
-            </option>
-        `;
+        const key = `${sec.subject_code}|${sec.subject_name}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            box.innerHTML += `
+                <option value="${key}">
+                    ${sec.subject_code} - ${sec.subject_name}
+                </option>
+            `;
+        }
     });
 
-    selectedSection = subjects[0] ? subjects[0].section_id : null;
-    if (selectedSection) loadSectionInfo();
+    if (subjects.length > 0) {
+        loadSectionInfo();
+    }
 }
 
 function loadSectionInfo() {
-    const secId = qs("#subjectSelect").value;
-    const sec = sectionList.find((s) => s.section_id == secId);
-    if (!sec) return;
+    const subjectKey = qs("#subjectSelect").value;
+    if (!subjectKey) return;
 
-    qs("#levelSelect").value = sec.class_level;
-    qs("#roomSelect").value = sec.room;
-    selectedSection = sec.section_id;
+    const [code, name] = subjectKey.split("|");
+    const matching = sectionList.filter(
+        (s) => s.subject_code === code && s.subject_name === name
+    );
+
+    // Populate level dropdown with unique levels for this subject
+    const levelSelect = qs("#levelSelect");
+    const roomSelect = qs("#roomSelect");
+
+    const uniqueLevels = [...new Set(matching.map((s) => s.class_level))];
+    levelSelect.innerHTML = "";
+    uniqueLevels.forEach((lv) => {
+        levelSelect.innerHTML += `<option value="${lv}">${lv}</option>`;
+    });
+
+    // Populate room dropdown based on selected level
+    updateRoomOptions(matching);
+}
+
+function updateRoomOptions(matching) {
+    if (!matching) {
+        const subjectKey = qs("#subjectSelect").value;
+        if (!subjectKey) return;
+        const [code, name] = subjectKey.split("|");
+        matching = sectionList.filter(
+            (s) => s.subject_code === code && s.subject_name === name
+        );
+    }
+
+    const level = qs("#levelSelect").value;
+    const roomSelect = qs("#roomSelect");
+    const filteredByLevel = matching.filter((s) => s.class_level === level);
+
+    const uniqueRooms = [...new Set(filteredByLevel.map((s) => s.room))];
+    roomSelect.innerHTML = "";
+    uniqueRooms.forEach((rm) => {
+        roomSelect.innerHTML += `<option value="${rm}">${rm}</option>`;
+    });
+
+    // Set selectedSection
+    updateSectionSelection();
 }
 
 function updateSectionSelection() {
+    const subjectKey = qs("#subjectSelect").value;
+    if (!subjectKey) return;
+
+    const [code, name] = subjectKey.split("|");
     const level = qs("#levelSelect").value;
     const room = qs("#roomSelect").value;
 
     const sec = sectionList.find(
-        (s) => String(s.class_level) === String(level) && String(s.room) === String(room)
+        (s) => s.subject_code === code && s.subject_name === name &&
+            String(s.class_level) === String(level) && String(s.room) === String(room)
     );
 
-    if (sec) selectedSection = sec.section_id;
+    selectedSection = sec ? sec.section_id : null;
 }
 
 async function loadHeaders() {
@@ -143,7 +194,8 @@ window.deleteHeader = async function (id) {
     }
 };
 
-async function addHeader() {
+async function saveHeaderForm() {
+    const id = qs("#editHeaderId").value;
     const name = qs("#headerName").value.trim();
     const maxScore = qs("#maxScore").value;
     const form = qs("#headerModal");
@@ -165,20 +217,39 @@ async function addHeader() {
         return;
     }
 
-    const data = {
+    const payload = {
         section_id: selectedSection,
-        header_name: name,
+        header_name: name, // For Add
+        title: name,       // For Update (backend naming inconsistency handled here or uniform it)
         max_score: Number(maxScore)
     };
 
-    await fetch(`${API_BASE}/teacher/scores/header_add`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    });
+    try {
+        let url, method;
+        if (id) {
+            // Update
+            url = `${API_BASE}/teacher/scores/header_update/${id}`;
+            method = "PUT";
+        } else {
+            // Add
+            url = `${API_BASE}/teacher/scores/header_add`;
+            method = "POST";
+        }
 
-    loadHeaders();
-    closeModal("headerModal");
+        const res = await fetch(url, {
+            method: method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error("Request failed");
+
+        await loadHeaders();
+        closeModal("headerModal");
+    } catch (err) {
+        console.error(err);
+        alert("เกิดข้อผิดพลาดในการบันทึกหัวข้อคะแนน");
+    }
 }
 
 async function loadStudentsAndScores() {
@@ -324,40 +395,17 @@ function renderScoreTable() {
 }
 
 // แก้ไขหัวข้อคะแนน
-window.editHeader = async function (id) {
+// แก้ไขหัวข้อคะแนน
+window.editHeader = function (id) {
     const header = currentHeaders.find((h) => h.id === id);
     if (!header) return;
 
-    const newTitle = prompt("ชื่อหัวข้อคะแนน:", header.title);
-    if (newTitle === null) return; // cancelled
-    if (!newTitle.trim()) {
-        alert("กรุณากรอกชื่อหัวข้อคะแนน");
-        return;
-    }
+    qs("#editHeaderId").value = header.id;
+    qs("#headerName").value = header.title;
+    qs("#maxScore").value = header.max_score;
+    qs("#headerModalTitle").textContent = "แก้ไขหัวข้อคะแนน";
 
-    const newMax = prompt("คะแนนเต็ม:", header.max_score);
-    if (newMax === null) return; // cancelled
-    if (!newMax || Number(newMax) <= 0 || isNaN(Number(newMax))) {
-        alert("คะแนนเต็มต้องเป็นตัวเลขและมากกว่า 0");
-        return;
-    }
-
-    try {
-        const res = await fetch(`${API_BASE}/teacher/scores/header_update/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: newTitle.trim(), max_score: Number(newMax) })
-        });
-        const data = await res.json();
-        if (data.id) {
-            // Reload the table with updated headers
-            await loadHeaders();
-        } else {
-            alert("แก้ไขไม่สำเร็จ");
-        }
-    } catch (err) {
-        alert("เกิดข้อผิดพลาดในการแก้ไขหัวข้อ");
-    }
+    openModal("headerModal");
 };
 
 async function saveAllScores() {
