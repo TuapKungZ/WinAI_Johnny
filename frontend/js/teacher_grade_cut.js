@@ -142,6 +142,17 @@ async function loadScoreTable() {
     const data = await res.json();
     currentRows = Array.isArray(data) ? data : [];
     renderScoreTable(currentRows);
+
+    // Auto-sync if calculated score OR grade differs from saved
+    const needSync = currentRows.some(s => {
+        const currentGrade = calculateGrade(Number(s.total_score ?? 0));
+        return s.total_score !== s.saved_total_score || s.saved_grade !== currentGrade;
+    });
+
+    if (needSync) {
+        console.log("Syncing scores and grades...");
+        await saveGrades(true);
+    }
 }
 
 function renderScoreTable(list) {
@@ -149,6 +160,13 @@ function renderScoreTable(list) {
         setState(qs("#gradeTableContainer"), "empty", "ไม่มีข้อมูลคะแนน");
         return;
     }
+
+    // Recalculate grades for display
+    const calculatedList = list.map(stu => ({
+        ...stu,
+        display_grade: calculateGrade(Number(stu.total_score ?? 0))
+    }));
+
     let html = `
         <table class="grade-table">
             <tr>
@@ -161,7 +179,8 @@ function renderScoreTable(list) {
 
     list.forEach((stu) => {
         const totalScore = stu.total_score ?? 0;
-        const grade = stu.saved_grade || calculateGrade(Number(totalScore));
+        // Always calculate grade based on current thresholds to avoid stale data
+        const grade = calculateGrade(Number(totalScore));
 
         html += `
         <tr>
