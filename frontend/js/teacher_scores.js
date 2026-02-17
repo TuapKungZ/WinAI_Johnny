@@ -164,9 +164,8 @@ async function loadHeaders() {
     const res = await fetch(`${API_BASE}/teacher/scores/headers?section_id=${selectedSection}`);
     const headers = await res.json();
 
-    if (!Array.isArray(headers) || headers.length === 0) {
-        renderHeaders(demoHeaders);
-        return;
+    if (!Array.isArray(headers)) {
+        headers = [];
     }
 
     renderHeaders(headers);
