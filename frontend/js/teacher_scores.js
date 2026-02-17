@@ -121,7 +121,7 @@ function updateRoomOptions(matching) {
     const roomSelect = qs("#roomSelect");
     const filteredByLevel = matching.filter((s) => s.class_level === level);
 
-    const uniqueRooms = [...new Set(filteredByLevel.map((s) => s.room))];
+    const uniqueRooms = [...new Set(filteredByLevel.map((s) => s.room))].sort((a, b) => a - b);
     roomSelect.innerHTML = "";
     uniqueRooms.forEach((rm) => {
         roomSelect.innerHTML += `<option value="${rm}">${rm}</option>`;

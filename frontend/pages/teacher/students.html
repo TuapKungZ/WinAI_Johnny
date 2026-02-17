@@ -23,15 +23,19 @@
         </div>
         <ul class="menu-list">
             <li><a href="dashboard.html" class="menu-item"><i class="fa-solid fa-home"></i> แดชบอร์ด</a></li>
-            <li><a href="students.html" class="menu-item active"><i class="fa-solid fa-users"></i> รายชื่อนักเรียน</a></li>
+            <li><a href="students.html" class="menu-item active"><i class="fa-solid fa-users"></i> รายชื่อนักเรียน</a>
+            </li>
             <li><a href="attendance.html" class="menu-item"><i class="fa-solid fa-calendar-check"></i> เช็คชื่อ</a></li>
             <li><a href="scores.html" class="menu-item"><i class="fa-solid fa-pen-nib"></i> กรอกคะแนน</a></li>
             <li><a href="grade_cut.html" class="menu-item"><i class="fa-solid fa-scissors"></i> ตัดเกรด</a></li>
-            <li><a href="teaching_evaluation.html" class="menu-item"><i class="fa-solid fa-chart-line"></i> ผลประเมินการสอน</a></li>
-            <li><a href="advisor_evaluation.html" class="menu-item"><i class="fa-solid fa-user-check"></i> ประเมินนักเรียน</a></li>
+            <li><a href="teaching_evaluation.html" class="menu-item"><i class="fa-solid fa-chart-line"></i>
+                    ผลประเมินการสอน</a></li>
+            <li><a href="advisor_evaluation.html" class="menu-item"><i class="fa-solid fa-user-check"></i>
+                    ประเมินนักเรียน</a></li>
             <li><a href="fitness.html" class="menu-item"><i class="fa-solid fa-dumbbell"></i> ทดสอบสมรรถนะ</a></li>
             <li><a href="calendar.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i> ปฏิทิน</a></li>
-            <li><a href="exam_calendar.html" class="menu-item"><i class="fa-solid fa-clipboard-list"></i> ตารางสอบ</a></li>
+            <li><a href="exam_calendar.html" class="menu-item"><i class="fa-solid fa-clipboard-list"></i> ตารางสอบ</a>
+            </li>
         </ul>
 
         <div class="logout-btn" onclick="logoutTeacher()">
@@ -60,34 +64,7 @@
                 <span class="students-pill">อัปเดตล่าสุด</span>
             </div>
             <div id="classInfo" class="class-info-box"></div>
-            <div class="students-filter">
-                <div>
-                    <label>ระดับชั้น</label>
-                    <select id="classLevelFilter" class="custom-select">
-                        <option value="">ทั้งหมด</option>
-                        <option value="ม.1">ม.1</option>
-                        <option value="ม.2">ม.2</option>
-                        <option value="ม.3">ม.3</option>
-                        <option value="ม.4">ม.4</option>
-                        <option value="ม.5">ม.5</option>
-                        <option value="ม.6">ม.6</option>
-                    </select>
-                </div>
-                <div>
-                    <label>ห้อง</label>
-                    <select id="roomFilter" class="custom-select">
-                        <option value="">ทั้งหมด</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
-                </div>
-                <div class="students-filter-action">
-                    <button class="btn-primary" id="applyFilterBtn">แสดงรายชื่อ</button>
-                </div>
-            </div>
+            <!-- Filter removed as per requirement -->
         </section>
 
         <section class="students-list-card">

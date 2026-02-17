@@ -36,31 +36,39 @@ router.get("/list", async (req, res) => {
             });
         }
 
-        const sections = await pool.query(
-            `SELECT class_level, classroom
-             FROM subject_sections
+        // 1. Find advisor info for this teacher
+        const advisorInfo = await pool.query(
+            `SELECT class_level, room
+             FROM teacher_advisors
              WHERE teacher_id = $1
-             ORDER BY year DESC, semester DESC, id ASC`,
+             ORDER BY id DESC
+             LIMIT 1`,
             [teacher_id]
         );
 
-        if (sections.rows.length === 0) {
-            return res.json([]);
+        if (advisorInfo.rows.length === 0) {
+            // Not an advisor for any class
+            return res.json({
+                level: "-",
+                room: "-",
+                students: []
+            });
         }
 
-        const { class_level: section_level, classroom } = sections.rows[0];
+        const { class_level: advisoryLevel, room: advisoryRoom } = advisorInfo.rows[0];
 
+        // 2. Fetch students in that class
         const students = await pool.query(
             `SELECT id, student_code, first_name, last_name, photo_url
              FROM students
              WHERE class_level = $1 AND (classroom = $2 OR room = $2)
              ORDER BY student_code ASC`,
-            [section_level, classroom]
+            [advisoryLevel, advisoryRoom]
         );
 
         res.json({
-            level: section_level,
-            room: classroom,
+            level: advisoryLevel,
+            room: advisoryRoom,
             students: students.rows
         });
     } catch (err) {

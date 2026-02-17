@@ -6,36 +6,15 @@ let teacher = null;
 window.onload = async () => {
     teacher = requireTeacherLogin();
     loadStudentList();
-
-    const applyBtn = qs("#applyFilterBtn");
-    if (applyBtn) {
-        applyBtn.addEventListener("click", () => loadStudentList(true));
-    }
-
-    const classFilter = qs("#classLevelFilter");
-    const roomFilter = qs("#roomFilter");
-    if (classFilter && roomFilter) {
-        classFilter.addEventListener("change", () => loadStudentList(true));
-        roomFilter.addEventListener("change", () => loadStudentList(true));
-    }
 };
 
-function buildFilterQuery(useFilter) {
-    if (!useFilter) return "";
-    const level = qs("#classLevelFilter")?.value || "";
-    const room = qs("#roomFilter")?.value || "";
-    let query = "";
-    if (level && level !== "All") query += `&class_level=${encodeURIComponent(level)}`;
-    if (room && room !== "All") query += `&room=${encodeURIComponent(room)}`;
-    return query;
-}
-
-async function loadStudentList(useFilter = false) {
+async function loadStudentList() {
     setState(qs("#classInfo"), "loading", "กำลังโหลดข้อมูลห้องเรียน...");
     setState(qs("#studentList"), "loading", "กำลังโหลดรายชื่อนักเรียน...");
 
+    // Fetch advisees directly
     const res = await fetch(
-        `${API_BASE}/teacher/students/list?teacher_id=${teacher.id}` + buildFilterQuery(useFilter)
+        `${API_BASE}/teacher/students/list?teacher_id=${teacher.id}`
     );
 
     const data = await res.json();
@@ -51,7 +30,11 @@ async function loadStudentList(useFilter = false) {
         if (!Array.isArray(data)) {
             qs("#classInfo").innerHTML = `
                 <h2>ชั้นเรียน: ${data.level} / ห้อง ${data.room}</h2>
-                <p style="margin:6px 0 0; color:#7a6f63;">ไม่มีนักเรียนในห้องที่เลือก</p>
+                <p style="margin:6px 0 0; color:#7a6f63;">ไม่มีนักเรียนในที่ปรึกษา</p>
+            `;
+        } else {
+            qs("#classInfo").innerHTML = `
+                <h2>ยังไม่ได้เป็นที่ปรึกษาห้องใด</h2>
             `;
         }
         setState(qs("#studentList"), "empty", "ไม่มีรายชื่อนักเรียน");

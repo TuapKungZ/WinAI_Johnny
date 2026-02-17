@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>???????????????</title>
+    <title>โปรไฟล์นักเรียน</title>
 
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,24 +18,29 @@
             <div class="logo-icon" data-avatar-role="teacher"><i class="fa-solid fa-chalkboard-user"></i></div>
             <div class="logo-text">
                 <h3>WinAI School</h3>
-                <span>???</span>
+                <span>ครู</span>
             </div>
         </div>
-<ul class="menu-list">
-            <li><a href="dashboard.html" class="menu-item"><i class="fa-solid fa-home"></i> ????????</a></li>
-            <li><a href="students.html" class="menu-item active"><i class="fa-solid fa-users"></i> ???????????????</a></li>
-            <li><a href="attendance.html" class="menu-item"><i class="fa-solid fa-calendar-check"></i> ????????</a></li>
-            <li><a href="scores.html" class="menu-item"><i class="fa-solid fa-pen-nib"></i> ?????????</a></li>
-            <li><a href="grade_cut.html" class="menu-item"><i class="fa-solid fa-scissors"></i> ???????</a></li>
-            <li><a href="teaching_evaluation.html" class="menu-item"><i class="fa-solid fa-chart-line"></i> ???????????????</a></li>
-            <li><a href="advisor_evaluation.html" class="menu-item"><i class="fa-solid fa-user-check"></i> ???????????????</a></li>
-            <li><a href="fitness.html" class="menu-item"><i class="fa-solid fa-dumbbell"></i> &#3607;&#3604;&#3626;&#3629;&#3610;&#3626;&#3617;&#3619;&#3619;&#3606;&#3609;&#3632;</a></li>
-            <li><a href="calendar.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i> ??????</a></li>
-            <li><a href="exam_calendar.html" class="menu-item"><i class="fa-solid fa-clipboard-list"></i> ????????</a></li>
+        <ul class="menu-list">
+            <li><a href="dashboard.html" class="menu-item"><i class="fa-solid fa-home"></i> แดชบอร์ด</a></li>
+            <li><a href="students.html" class="menu-item active"><i class="fa-solid fa-users"></i> รายชื่อนักเรียน</a>
+            </li>
+            <li><a href="attendance.html" class="menu-item"><i class="fa-solid fa-calendar-check"></i> เช็คชื่อ</a></li>
+            <li><a href="scores.html" class="menu-item"><i class="fa-solid fa-pen-nib"></i> กรอกคะแนน</a></li>
+            <li><a href="grade_cut.html" class="menu-item"><i class="fa-solid fa-scissors"></i> ตัดเกรด</a></li>
+            <li><a href="teaching_evaluation.html" class="menu-item"><i class="fa-solid fa-chart-line"></i>
+                    ผลประเมินการสอน</a></li>
+            <li><a href="advisor_evaluation.html" class="menu-item"><i class="fa-solid fa-user-check"></i>
+                    ประเมินนักเรียน</a></li>
+            <li><a href="fitness.html" class="menu-item"><i class="fa-solid fa-dumbbell"></i>
+                    ทดสอบสมรรถนะ</a></li>
+            <li><a href="calendar.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i> ปฏิทิน</a></li>
+            <li><a href="exam_calendar.html" class="menu-item"><i class="fa-solid fa-clipboard-list"></i> ตารางสอบ</a>
+            </li>
         </ul>
 
         <div class="logout-btn" onclick="logoutTeacher()">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i> ??????????
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> ออกจากระบบ
         </div>
     </aside>
 
@@ -42,7 +48,7 @@
     <main class="main-wrapper teacher-page">
 
         <div class="page-header">
-            <div class="page-title">???????????????</div>
+            <div class="page-title">โปรไฟล์นักเรียน</div>
         </div>
 
         <div id="profileBasic" class="profile-section"></div>
@@ -52,7 +58,7 @@
         <div id="profileHealth" class="profile-section"></div>
 
         <button class="btn-outline" onclick="history.back()" style="margin-top:20px;">
-            <i class="fa-solid fa-arrow-left"></i> ??????????????????
+            <i class="fa-solid fa-arrow-left"></i> ย้อนกลับ
         </button>
 
     </main>
@@ -60,4 +66,5 @@
     <script type="module" src="../../js/app.js"></script>
     <script type="module" src="../../js/teacher_student_profile.js"></script>
 </body>
+
 </html>
