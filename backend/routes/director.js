@@ -516,7 +516,18 @@ router.get("/subjects", async (req, res) => {
         if (search) {
             params.push(`%${search}%`);
             where.push(`(subject_code ILIKE $${params.length} OR name ILIKE $${params.length} OR name_th ILIKE $${params.length} OR name_en ILIKE $${params.length})`);
+        } else {
+            // Only filter by year/semester if NOT searching
+            if (year) {
+                params.push(Number(year));
+                where.push(`year = $${params.length}`);
+            }
+            if (semester) {
+                params.push(Number(semester));
+                where.push(`semester = $${params.length}`);
+            }
         }
+
         if (level) {
             params.push(level);
             where.push(`level = $${params.length}`);
@@ -528,14 +539,6 @@ router.get("/subjects", async (req, res) => {
         if (type) {
             params.push(type);
             where.push(`subject_type = $${params.length}`);
-        }
-        if (year) {
-            params.push(Number(year));
-            where.push(`year = $${params.length}`);
-        }
-        if (semester) {
-            params.push(Number(semester));
-            where.push(`semester = $${params.length}`);
         }
 
         const result = await pool.query(
@@ -599,6 +602,9 @@ router.post("/subjects", async (req, res) => {
         );
         res.json({ success: true, id: result.rows[0].id });
     } catch (err) {
+        if (err.code === "23505") {
+            return res.status(400).json({ error: "รหัสวิชานี้มีอยู่ในระบบแล้ว" });
+        }
         console.error("ERROR /director/subjects POST:", err);
         res.status(500).json({ error: "Server error" });
     }
@@ -618,6 +624,9 @@ router.put("/subjects/:id", async (req, res) => {
         );
         res.json({ success: true });
     } catch (err) {
+        if (err.code === "23505") {
+            return res.status(400).json({ error: "รหัสวิชานี้มีอยู่ในระบบแล้ว" });
+        }
         console.error("ERROR /director/subjects PUT:", err);
         res.status(500).json({ error: "Server error" });
     }
