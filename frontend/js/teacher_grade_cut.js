@@ -26,7 +26,11 @@ window.onload = async () => {
     qs("#gradeD").addEventListener("input", handleThresholdChange);
     qs("#gradeF").addEventListener("input", handleThresholdChange);
     qs("#loadScoreBtn").addEventListener("click", loadScoreTable);
-    qs("#saveGradeBtn").addEventListener("click", saveGrades);
+    qs("#saveGradeBtn").addEventListener("click", () => {
+        if (confirm("ยืนยันการบันทึกเกรดทั้งหมด?")) {
+            saveGrades(false);
+        }
+    });
 };
 
 async function loadSubjects() {
