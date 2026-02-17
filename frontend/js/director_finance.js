@@ -39,15 +39,23 @@ function renderFinance() {
 
     financeList.forEach((item) => {
         const amount = Number(item.amount || 0);
-        if (item.type === "income") income += amount;
-        if (item.type === "expense") expense += amount;
+        const type = String(item.type || "").trim().toLowerCase();
+
+        // Check for both English and Thai values
+        const isIncome = type === "income" || type === "รายรับ";
+        const isExpense = type === "expense" || type === "รายจ่าย";
+
+        if (isIncome) income += amount;
+        if (isExpense) expense += amount;
 
         body.innerHTML += `
             <tr>
-                <td>${formatDate(item.record_date)}</td>
                 <td>${item.title || "-"}</td>
                 <td>${item.category || "-"}</td>
-                <td>${item.type === "income" ? "รายรับ" : "รายจ่าย"}</td>
+                <td class="${isIncome ? 'text-success' : 'text-danger'}">
+                    ${isIncome ? "รายรับ" : (isExpense ? "รายจ่าย" : item.type)}
+                </td>
+                <td>${formatDate(item.record_date)}</td>
                 <td>${formatAmount(amount)}</td>
                 <td>
                     <button class="btn-outline" onclick="editFinance(${item.id})">แก้ไข</button>
@@ -77,7 +85,7 @@ function formatDate(value) {
     return date.toLocaleDateString("th-TH");
 }
 
-window.editFinance = function(id) {
+window.editFinance = function (id) {
     const item = financeList.find((x) => x.id === id);
     if (!item) return;
     qs("#financeId").value = item.id;
@@ -90,7 +98,7 @@ window.editFinance = function(id) {
     openModal("financeModal");
 };
 
-window.deleteFinance = async function(id) {
+window.deleteFinance = async function (id) {
     if (!confirm("ต้องการลบรายการนี้หรือไม่?")) return;
     await fetch(`${API_BASE}/director/finance/${id}`, { method: "DELETE" });
     loadFinance();

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
 
     <aside class="sidebar">
@@ -19,15 +21,19 @@
         </div>
         <ul class="menu-list">
             <li><a href="dashboard.html" class="menu-item"><i class="fa-solid fa-chart-pie"></i> แดชบอร์ด</a></li>
-            <li><a href="students.html" class="menu-item"><i class="fa-solid fa-user-graduate"></i> จัดการนักเรียน</a></li>
+            <li><a href="students.html" class="menu-item"><i class="fa-solid fa-user-graduate"></i> จัดการนักเรียน</a>
+            </li>
             <li><a href="teachers.html" class="menu-item"><i class="fa-solid fa-user-tie"></i> จัดการครู</a></li>
             <li><a href="advisors.html" class="menu-item"><i class="fa-solid fa-user-check"></i> ครูที่ปรึกษา</a></li>
             <li><a href="subjects.html" class="menu-item"><i class="fa-solid fa-book"></i> จัดการรายวิชา</a></li>
-            <li><a href="curriculum.html" class="menu-item active"><i class="fa-solid fa-layer-group"></i> จัดการตารางสอน</a></li>
+            <li><a href="curriculum.html" class="menu-item active"><i class="fa-solid fa-layer-group"></i>
+                    จัดการตารางสอน</a></li>
             <li><a href="activities.html" class="menu-item"><i class="fa-solid fa-calendar-check"></i> กิจกรรม</a></li>
-            <li><a href="evaluation.html" class="menu-item"><i class="fa-solid fa-clipboard-check"></i> ประเมินการสอน</a></li>
+            <li><a href="evaluation.html" class="menu-item"><i class="fa-solid fa-clipboard-check"></i>
+                    ประเมินการสอน</a></li>
             <li><a href="finance.html" class="menu-item"><i class="fa-solid fa-coins"></i> งบประมาณ</a></li>
-            <li><a href="student_count.html" class="menu-item"><i class="fa-solid fa-chart-column"></i> สถิตินักเรียน</a></li>
+            <li><a href="student_count.html" class="menu-item"><i class="fa-solid fa-chart-column"></i>
+                    สถิตินักเรียน</a></li>
             <li><a href="projects.html" class="menu-item"><i class="fa-solid fa-diagram-project"></i> โครงการ</a></li>
         </ul>
         <div class="logout-btn" onclick="logoutDirector()">
@@ -44,55 +50,120 @@
             </div>
         </section>
 
-        <section class="director-section">
-            <div class="director-section-head">
-                <h3><i class="fa-solid fa-filter"></i> ค้นหารายวิชา</h3>
-                <span class="director-pill">รหัสวิชา</span>
-            </div>
-            <div class="director-filter-grid compact-action">
-                <div>
-                    <label>ค้นหา</label>
-                    <input id="sectionSearch" type="text" placeholder="ค้นหารหัสวิชา">
-                </div>
-                <div class="director-actions" style="align-items:flex-end;">
-                    <div class="director-filter-actions"><button class="btn-primary" id="searchSectionBtn">ค้นหา</button></div>
-                </div>
-            </div>
-        </section>
+        <div class="tabs-container" style="margin-bottom: 20px;">
+            <button class="tab-btn active" onclick="switchTab('sections')"><i class="fa-solid fa-layer-group"></i>
+                จัดการตารางสอน</button>
+            <button class="tab-btn" onclick="switchTab('exams')"><i class="fa-solid fa-file-signature"></i>
+                จัดการตารางสอบ</button>
+        </div>
 
-        <section class="director-section">
-            <div class="director-section-head">
-                <h3><i class="fa-solid fa-layer-group"></i> เพิ่มตารางสอน</h3>
-                <span class="director-pill">ฟอร์มเพิ่มข้อมูล</span>
-            </div>
-            <div class="director-actions">
-                <button class="btn-primary" id="openSectionModalBtn">เพิ่มตารางสอนใหม่</button>
-            </div>
-        </section>
+        <!-- VIEW: SECTIONS -->
+        <div id="view-sections">
+            <section class="director-section">
+                <div class="director-section-head">
+                    <h3><i class="fa-solid fa-filter"></i> ค้นหารายวิชา</h3>
+                    <span class="director-pill">รหัสวิชา</span>
+                </div>
+                <div class="director-filter-grid compact-action">
+                    <div>
+                        <label>ค้นหา</label>
+                        <input id="sectionSearch" type="text" placeholder="ค้นหารหัสวิชา">
+                    </div>
+                    <div class="director-actions" style="align-items:flex-end;">
+                        <div class="director-filter-actions"><button class="btn-primary"
+                                id="searchSectionBtn">ค้นหา</button></div>
+                    </div>
+                </div>
+            </section>
 
-        <section class="director-section">
-            <div class="director-section-head">
-                <h3><i class="fa-solid fa-list"></i> รายการตารางสอน</h3>
-                <span class="director-pill">ผลลัพธ์</span>
-            </div>
-            <div id="sectionsTableBox">
-                <table class="director-table">
-                    <thead>
-                        <tr>
-                            <th>รหัสวิชา</th>
-                            <th>ครูผู้สอน</th>
-                            <th>ปี / ภาคเรียน</th>
-                            <th>ชั้น / ห้อง</th>
-                            <th>วัน / เวลา</th>
-                            <th>จัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="sectionsBody"></tbody>
-                </table>
-            </div>
-        </section>
+            <section class="director-section">
+                <div class="director-section-head">
+                    <h3><i class="fa-solid fa-layer-group"></i> เพิ่มตารางสอน</h3>
+                    <span class="director-pill">ฟอร์มเพิ่มข้อมูล</span>
+                </div>
+                <div class="director-actions">
+                    <button class="btn-primary" id="openSectionModalBtn">เพิ่มตารางสอนใหม่</button>
+                </div>
+            </section>
+
+            <section class="director-section">
+                <div class="director-section-head">
+                    <h3><i class="fa-solid fa-list"></i> รายการตารางสอน</h3>
+                    <span class="director-pill">ผลลัพธ์</span>
+                </div>
+                <div id="sectionsTableBox">
+                    <table class="director-table">
+                        <thead>
+                            <tr>
+                                <th>รหัสวิชา</th>
+                                <th>ครูผู้สอน</th>
+                                <th>ปี / ภาคเรียน</th>
+                                <th>ชั้น / ห้อง</th>
+                                <th>วัน / เวลา</th>
+                                <th>จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sectionsBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- VIEW: EXAMS -->
+        <div id="view-exams" style="display: none;">
+            <section class="director-section">
+                <div class="director-section-head">
+                    <h3><i class="fa-solid fa-plus-circle"></i> เพิ่มตารางสอบ</h3>
+                    <span class="director-pill">ฟอร์มเพิ่มข้อมูล</span>
+                </div>
+                <div class="director-actions">
+                    <button class="btn-primary" id="openExamModalBtn"><i class="fa-solid fa-plus"></i>
+                        เพิ่มตารางสอบใหม่</button>
+                </div>
+            </section>
+
+            <section class="director-section">
+                <div class="director-section-head">
+                    <h3><i class="fa-solid fa-list-check"></i> รายการตารางสอบ</h3>
+                    <span class="director-pill" id="examCountPill">0 รายการ</span>
+                </div>
+                <div id="examsTableBox" style="overflow-x:auto;">
+                    <table class="director-table" style="table-layout:fixed; width:100%;">
+                        <colgroup>
+                            <col style="width:50px;">
+                            <col style="width:22%;">
+                            <col style="width:10%;">
+                            <col style="width:12%;">
+                            <col style="width:14%;">
+                            <col style="width:12%;">
+                            <col style="width:10%;">
+                            <col style="width:130px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th style="text-align:center;">#</th>
+                                <th>รหัสวิชา / ชื่อวิชา</th>
+                                <th style="text-align:center;">ชั้น/ห้อง</th>
+                                <th style="text-align:center;">ประเภท</th>
+                                <th style="text-align:center;">วันที่สอบ</th>
+                                <th style="text-align:center;">เวลา</th>
+                                <th style="text-align:center;">ห้องสอบ</th>
+                                <th style="text-align:center;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="examsBody">
+                            <tr>
+                                <td colspan="8" style="text-align:center; padding:30px; color:#999;">กำลังโหลดข้อมูล...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
     </main>
 
+    <!-- Modal: Sections -->
     <div class="modal" id="sectionModal">
         <div class="modal-backdrop" data-modal-close="sectionModal"></div>
         <div class="modal-content">
@@ -124,68 +195,68 @@
                 <div>
                     <label>ชั้นเรียน</label>
                     <select id="sectionLevel" class="custom-select">
-<option value="">เลือกระดับชั้น</option>
-<option value="ม.1">ม.1</option>
-<option value="ม.2">ม.2</option>
-<option value="ม.3">ม.3</option>
-<option value="ม.4">ม.4</option>
-<option value="ม.5">ม.5</option>
-<option value="ม.6">ม.6</option>
-</select>
+                        <option value="">เลือกระดับชั้น</option>
+                        <option value="ม.1">ม.1</option>
+                        <option value="ม.2">ม.2</option>
+                        <option value="ม.3">ม.3</option>
+                        <option value="ม.4">ม.4</option>
+                        <option value="ม.5">ม.5</option>
+                        <option value="ม.6">ม.6</option>
+                    </select>
                 </div>
                 <div>
                     <label>ห้อง</label>
                     <select id="sectionRoom" class="custom-select">
-<option value="">เลือกห้อง</option>
-<option value="1">1</option>
-<option value="2">2</option>
-<option value="3">3</option>
-<option value="4">4</option>
-<option value="5">5</option>
-<option value="6">6</option>
-</select>
+                        <option value="">เลือกห้อง</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
                 </div>
                 <div>
                     <label>วันเรียน</label>
                     <select id="sectionDay" class="custom-select">
-<option value="">เลือกวันเรียน</option>
-<option value="จันทร์">จันทร์</option>
-<option value="อังคาร">อังคาร</option>
-<option value="พุธ">พุธ</option>
-<option value="พฤหัสบดี">พฤหัสบดี</option>
-<option value="ศุกร์">ศุกร์</option>
-<option value="เสาร์">เสาร์</option>
-<option value="อาทิตย์">อาทิตย์</option>
-</select>
+                        <option value="">เลือกวันเรียน</option>
+                        <option value="จันทร์">จันทร์</option>
+                        <option value="อังคาร">อังคาร</option>
+                        <option value="พุธ">พุธ</option>
+                        <option value="พฤหัสบดี">พฤหัสบดี</option>
+                        <option value="ศุกร์">ศุกร์</option>
+                        <option value="เสาร์">เสาร์</option>
+                        <option value="อาทิตย์">อาทิตย์</option>
+                    </select>
                 </div>
                 <div>
                     <label>เวลาเรียน</label>
                     <select id="sectionTime" class="custom-select">
-<option value="">เลือกเวลา</option>
-<option value="08:00-08:50">08:00-08:50</option>
-<option value="09:00-09:50">09:00-09:50</option>
-<option value="10:00-10:50">10:00-10:50</option>
-<option value="11:00-11:50">11:00-11:50</option>
-<option value="12:00-12:50">12:00-12:50</option>
-<option value="13:00-13:50">13:00-13:50</option>
-<option value="14:00-14:50">14:00-14:50</option>
-<option value="15:00-15:50">15:00-15:50</option>
-<option value="16:00-16:50">16:00-16:50</option>
-</select>
+                        <option value="">เลือกเวลา</option>
+                        <option value="08:00-08:50">08:00-08:50</option>
+                        <option value="09:00-09:50">09:00-09:50</option>
+                        <option value="10:00-10:50">10:00-10:50</option>
+                        <option value="11:00-11:50">11:00-11:50</option>
+                        <option value="12:00-12:50">12:00-12:50</option>
+                        <option value="13:00-13:50">13:00-13:50</option>
+                        <option value="14:00-14:50">14:00-14:50</option>
+                        <option value="15:00-15:50">15:00-15:50</option>
+                        <option value="16:00-16:50">16:00-16:50</option>
+                    </select>
                 </div>
                 <div>
                     <label>ห้องเรียน</label>
                     <select id="sectionClassroom" class="custom-select">
-<option value="">เลือกห้องเรียน</option>
-<option value="SC1-101">SC1-101</option>
-<option value="SC1-102">SC1-102</option>
-<option value="SC1-201">SC1-201</option>
-<option value="SC1-202">SC1-202</option>
-<option value="SC2-201">SC2-201</option>
-<option value="SC2-202">SC2-202</option>
-<option value="SC3-301">SC3-301</option>
-<option value="SC3-302">SC3-302</option>
-</select>
+                        <option value="">เลือกห้องเรียน</option>
+                        <option value="SC1-101">SC1-101</option>
+                        <option value="SC1-102">SC1-102</option>
+                        <option value="SC1-201">SC1-201</option>
+                        <option value="SC1-202">SC1-202</option>
+                        <option value="SC2-201">SC2-201</option>
+                        <option value="SC2-202">SC2-202</option>
+                        <option value="SC3-301">SC3-301</option>
+                        <option value="SC3-302">SC3-302</option>
+                    </select>
                 </div>
             </div>
             <div class="director-actions" style="margin-top:14px;">
@@ -195,7 +266,97 @@
         </div>
     </div>
 
+    <!-- Modal: Exams -->
+    <div class="modal" id="examModal">
+        <div class="modal-backdrop" data-modal-close="examModal"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>เพิ่ม / แก้ไข ตารางสอบ</h3>
+                <button class="modal-close" data-modal-close="examModal">x</button>
+            </div>
+            <input type="hidden" id="examId">
+            <div class="director-form-grid">
+                <div style="grid-column: span 2;">
+                    <label>เลือกวิชา (Section)</label>
+                    <select id="examSectionSelect" class="custom-select">
+                        <option value="">-- เลือกรายวิชา --</option>
+                    </select>
+                </div>
+                <div>
+                    <label>ประเภทการสอบ</label>
+                    <select id="examType" class="custom-select">
+                        <option value="midterm">กลางภาค (Midterm)</option>
+                        <option value="final">ปลายภาค (Final)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>วันที่สอบ</label>
+                    <input type="date" id="examDate">
+                </div>
+                <div>
+                    <label>เวลา (เช่น 09:00-11:00)</label>
+                    <input type="text" id="examTimeRange" placeholder="ระบุเวลา">
+                </div>
+                <div>
+                    <label>ห้องสอบ</label>
+                    <input type="text" id="examRoom" placeholder="ระบุห้องสอบ">
+                </div>
+            </div>
+            <div class="director-actions" style="margin-top:14px;">
+                <button class="btn-primary" id="saveExamBtn">บันทึกตารางสอบ</button>
+                <button class="btn-outline" id="resetExamBtn">ล้างค่า</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if (tab === 'sections') {
+                document.getElementById('view-sections').style.display = 'block';
+                document.getElementById('view-exams').style.display = 'none';
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            } else {
+                document.getElementById('view-sections').style.display = 'none';
+                document.getElementById('view-exams').style.display = 'block';
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            }
+        }
+    </script>
+
+    <style>
+        .tabs-container {
+            display: flex;
+            gap: 10px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-brown);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #f3f4f6;
+        }
+    </style>
+
     <script type="module" src="../../js/app.js"></script>
     <script type="module" src="../../js/director_curriculum.js"></script>
 </body>
+
 </html>

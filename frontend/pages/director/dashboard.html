@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
+
 <body>
 
     <aside class="sidebar">
@@ -20,16 +22,21 @@
         </div>
 
         <ul class="menu-list">
-            <li><a href="dashboard.html" class="menu-item active"><i class="fa-solid fa-chart-pie"></i> แดชบอร์ด</a></li>
-            <li><a href="students.html" class="menu-item"><i class="fa-solid fa-user-graduate"></i> จัดการนักเรียน</a></li>
+            <li><a href="dashboard.html" class="menu-item active"><i class="fa-solid fa-chart-pie"></i> แดชบอร์ด</a>
+            </li>
+            <li><a href="students.html" class="menu-item"><i class="fa-solid fa-user-graduate"></i> จัดการนักเรียน</a>
+            </li>
             <li><a href="teachers.html" class="menu-item"><i class="fa-solid fa-user-tie"></i> จัดการครู</a></li>
             <li><a href="advisors.html" class="menu-item"><i class="fa-solid fa-user-check"></i> ครูที่ปรึกษา</a></li>
             <li><a href="subjects.html" class="menu-item"><i class="fa-solid fa-book"></i> จัดการรายวิชา</a></li>
-            <li><a href="curriculum.html" class="menu-item"><i class="fa-solid fa-layer-group"></i> จัดการตารางสอน</a></li>
+            <li><a href="curriculum.html" class="menu-item"><i class="fa-solid fa-layer-group"></i> จัดการตารางสอน</a>
+            </li>
             <li><a href="activities.html" class="menu-item"><i class="fa-solid fa-calendar-check"></i> กิจกรรม</a></li>
-            <li><a href="evaluation.html" class="menu-item"><i class="fa-solid fa-clipboard-check"></i> ประเมินการสอน</a></li>
+            <li><a href="evaluation.html" class="menu-item"><i class="fa-solid fa-clipboard-check"></i>
+                    ประเมินการสอน</a></li>
             <li><a href="finance.html" class="menu-item"><i class="fa-solid fa-coins"></i> งบประมาณ</a></li>
-            <li><a href="student_count.html" class="menu-item"><i class="fa-solid fa-chart-column"></i> สถิตินักเรียน</a></li>
+            <li><a href="student_count.html" class="menu-item"><i class="fa-solid fa-chart-column"></i>
+                    สถิตินักเรียน</a></li>
             <li><a href="projects.html" class="menu-item"><i class="fa-solid fa-diagram-project"></i> โครงการ</a></li>
         </ul>
 
@@ -110,24 +117,6 @@
                         </div>
                     </div>
                 </a>
-                <a class="director-stat-link" href="finance.html">
-                    <div class="director-stat">
-                        <div class="stat-icon"><i class="fa-solid fa-coins"></i></div>
-                        <div>
-                            <div class="stat-label">รายรับ</div>
-                            <div class="stat-value" id="dirIncome">?</div>
-                        </div>
-                    </div>
-                </a>
-                <a class="director-stat-link" href="finance.html">
-                    <div class="director-stat">
-                        <div class="stat-icon"><i class="fa-solid fa-money-bill"></i></div>
-                        <div>
-                            <div class="stat-label">รายจ่าย</div>
-                            <div class="stat-value" id="dirExpense">?</div>
-                        </div>
-                    </div>
-                </a>
             </div>
         </section>
 
@@ -150,9 +139,46 @@
                 <div class="director-list" id="dirActivityList"></div>
             </div>
         </section>
+
+        <section class="director-section" style="margin-top: 20px;">
+            <div class="director-section-head">
+                <h3><i class="fa-solid fa-coins"></i> งบประมาณประจำปี</h3>
+                <span class="director-pill">สถานะการเงิน</span>
+            </div>
+            <a href="finance.html" style="text-decoration: none;">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 20px;">
+                    <div style="background: #ecfdf5; padding: 24px; border-radius: 16px; border: 1px solid #10b981; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s;"
+                        onmouseover="this.style.transform='translateY(-5px)'"
+                        onmouseout="this.style.transform='translateY(0)'">
+                        <div style="font-size: 1.1rem; color: #059669; font-weight: 600; margin-bottom: 8px;"><i
+                                class="fa-solid fa-arrow-trend-up"></i> รายรับรวม</div>
+                        <div id="dirIncomeDisplay" style="font-size: 2rem; font-weight: 700; color: #059669;">Loading...
+                        </div>
+                    </div>
+                    <div style="background: #fef2f2; padding: 24px; border-radius: 16px; border: 1px solid #ef4444; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s;"
+                        onmouseover="this.style.transform='translateY(-5px)'"
+                        onmouseout="this.style.transform='translateY(0)'">
+                        <div style="font-size: 1.1rem; color: #b91c1c; font-weight: 600; margin-bottom: 8px;"><i
+                                class="fa-solid fa-arrow-trend-down"></i> รายจ่ายรวม</div>
+                        <div id="dirExpenseDisplay" style="font-size: 2rem; font-weight: 700; color: #b91c1c;">
+                            Loading...</div>
+                    </div>
+                    <div style="background: #eff6ff; padding: 24px; border-radius: 16px; border: 1px solid #3b82f6; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s;"
+                        onmouseover="this.style.transform='translateY(-5px)'"
+                        onmouseout="this.style.transform='translateY(0)'">
+                        <div style="font-size: 1.1rem; color: #1d4ed8; font-weight: 600; margin-bottom: 8px;"><i
+                                class="fa-solid fa-wallet"></i> คงเหลือสุทธิ</div>
+                        <div id="dirBalanceDisplay" style="font-size: 2rem; font-weight: 700; color: #1d4ed8;">
+                            Loading...</div>
+                    </div>
+                </div>
+            </a>
+        </section>
     </main>
 
     <script type="module" src="../../js/app.js"></script>
     <script type="module" src="../../js/director_dashboard.js"></script>
 </body>
+
 </html>

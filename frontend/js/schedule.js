@@ -97,7 +97,7 @@ async function loadClassTable(year, semester) {
 async function loadExamTable(year, semester) {
 
     const body = qs("#examListBody");
-    body.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">กำลังโหลด...</td></tr>`;
+    body.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px;">กำลังโหลด...</td></tr>`;
     const rows = await loadExamSchedule(student.id, year, semester);
     const examCount = document.getElementById("examCount");
     if (examCount) examCount.textContent = rows.length;
@@ -105,7 +105,7 @@ async function loadExamTable(year, semester) {
     const filtered = filterExamRows(rows);
     if (filtered.length === 0) {
         body.innerHTML = `
-            <tr><td colspan="5" style="text-align:center; padding:20px;">ยังไม่มีข้อมูล</td></tr>`;
+            <tr><td colspan="4" style="text-align:center; padding:20px;">ยังไม่มีข้อมูล</td></tr>`;
         return;
     }
 
@@ -226,7 +226,6 @@ function buildExamList(rows) {
         tr.innerHTML = `
             <td>${item.subject_code}</td>
             <td style="text-align:left; padding-left:16px;">${item.subject_name}</td>
-            <td class="center">${item.group || "-"}</td>
             <td class="center">${renderExamCell(item.midterm)}</td>
             <td class="center">${renderExamCell(item.final)}</td>
         `;

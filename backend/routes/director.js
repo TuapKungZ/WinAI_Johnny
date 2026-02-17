@@ -100,10 +100,10 @@ router.get("/summary", async (req, res) => {
         const subjects = await pool.query("SELECT COUNT(*) FROM subjects");
         const activities = await pool.query("SELECT COUNT(*) FROM school_activities");
         const income = await pool.query(
-            "SELECT COALESCE(SUM(amount),0) AS total FROM finance_records WHERE type='income'"
+            "SELECT COALESCE(SUM(amount),0) AS total FROM finance_records WHERE type ILIKE 'income' OR type = 'รายรับ'"
         );
         const expense = await pool.query(
-            "SELECT COALESCE(SUM(amount),0) AS total FROM finance_records WHERE type='expense'"
+            "SELECT COALESCE(SUM(amount),0) AS total FROM finance_records WHERE type ILIKE 'expense' OR type = 'รายจ่าย'"
         );
         const gender = await pool.query(
             `SELECT
@@ -1454,5 +1454,82 @@ router.get("/reports/attendance-summary", async (req, res) => {
     }
 });
 
-export default router;
+// EXAM SCHEDULE CRUD
+router.get("/exams", async (req, res) => {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS exam_schedule (
+                id SERIAL PRIMARY KEY,
+                section_id INTEGER,
+                exam_type VARCHAR(50),
+                exam_date DATE,
+                time_range VARCHAR(50),
+                room VARCHAR(50)
+            );
+        `);
 
+        const result = await pool.query(
+            `SELECT es.id, es.section_id, es.exam_type, es.exam_date, es.time_range, es.room,
+                    s.subject_code, s.name AS subject_name, ss.class_level, ss.classroom
+             FROM exam_schedule es
+             LEFT JOIN subject_sections ss ON es.section_id = ss.id
+             LEFT JOIN subjects s ON ss.subject_id = s.id
+             ORDER BY es.exam_date ASC, es.time_range ASC`
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error("ERROR /director/exams GET:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+router.post("/exams", async (req, res) => {
+    try {
+        const { section_id, exam_type, exam_date, time_range, room } = req.body;
+        if (!section_id || !exam_type || !exam_date) {
+            return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบถ้วน" });
+        }
+        const result = await pool.query(
+            `INSERT INTO exam_schedule(section_id, exam_type, exam_date, time_range, room)
+             VALUES($1, $2, $3, $4, $5) RETURNING id`,
+            [section_id, exam_type, exam_date, time_range, room]
+        );
+        res.json({ success: true, id: result.rows[0].id });
+    } catch (err) {
+        console.error("ERROR /director/exams POST:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+router.put("/exams/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { section_id, exam_type, exam_date, time_range, room } = req.body;
+        if (!section_id || !exam_type || !exam_date) {
+            return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบถ้วน" });
+        }
+        await pool.query(
+            `UPDATE exam_schedule
+             SET section_id=$1, exam_type=$2, exam_date=$3, time_range=$4, room=$5
+             WHERE id=$6`,
+            [section_id, exam_type, exam_date, time_range, room, id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error("ERROR /director/exams PUT:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+router.delete("/exams/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query("DELETE FROM exam_schedule WHERE id=$1", [id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error("ERROR /director/exams DELETE:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+export default router;

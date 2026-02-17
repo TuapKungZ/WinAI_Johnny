@@ -17,16 +17,37 @@ async function loadSummary() {
         qs("#dirCountTeachers").textContent = data.teachers ?? 0;
         qs("#dirCountSubjects").textContent = data.subjects ?? 0;
         qs("#dirCountActivities").textContent = data.activities ?? 0;
-        qs("#dirIncome").textContent = Number(data.income ?? 0).toLocaleString("th-TH");
-        qs("#dirExpense").textContent = Number(data.expense ?? 0).toLocaleString("th-TH");
+        const income = Number(data.income ?? 0);
+        const expense = Number(data.expense ?? 0);
+        const budget = income - expense;
+
+        // Update new bottom section
+        if (qs("#dirIncomeDisplay")) qs("#dirIncomeDisplay").textContent = income.toLocaleString("th-TH");
+        if (qs("#dirExpenseDisplay")) qs("#dirExpenseDisplay").textContent = expense.toLocaleString("th-TH");
+
+        const balanceEl = qs("#dirBalanceDisplay");
+        if (balanceEl) {
+            balanceEl.textContent = budget.toLocaleString("th-TH");
+            if (budget < 0) {
+                balanceEl.style.color = "#dc2626";
+                balanceEl.parentElement.style.borderColor = "#dc2626";
+                balanceEl.parentElement.style.background = "#fef2f2";
+            } else {
+                balanceEl.style.color = "#1d4ed8"; // Reset to blue
+                balanceEl.parentElement.style.borderColor = "#3b82f6";
+                balanceEl.parentElement.style.background = "#eff6ff";
+            }
+        }
+
     } catch (err) {
         console.error(err);
         qs("#dirCountStudents").textContent = "0";
         qs("#dirCountTeachers").textContent = "0";
         qs("#dirCountSubjects").textContent = "0";
         qs("#dirCountActivities").textContent = "0";
-        qs("#dirIncome").textContent = "0";
-        qs("#dirExpense").textContent = "0";
+        if (qs("#dirIncomeDisplay")) qs("#dirIncomeDisplay").textContent = "0";
+        if (qs("#dirExpenseDisplay")) qs("#dirExpenseDisplay").textContent = "0";
+        if (qs("#dirBalanceDisplay")) qs("#dirBalanceDisplay").textContent = "0";
     }
 }
 
